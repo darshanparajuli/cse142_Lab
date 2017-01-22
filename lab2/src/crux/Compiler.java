@@ -1,7 +1,5 @@
 package crux;
 
-import lab.util.PathUtil;
-
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -13,8 +11,6 @@ public class Compiler {
 
     public static void main(String[] args) {
         final String sourceFilename = args[0];
-
-        System.out.println(PathUtil.getLabPath());
 
         Scanner s = null;
         try {
