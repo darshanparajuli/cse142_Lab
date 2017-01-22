@@ -4,8 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import util.TestUtil;
 
-import java.io.BufferedReader;
 import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -61,17 +61,7 @@ public class ParserTest {
         }
         builder.append("\n");
 
-        final String actual = builder.toString();
-
-        final BufferedReader reader = Files.newBufferedReader(path);
-
-        int i = 0;
-        int c;
-        while ((c = reader.read()) != -1) {
-            Assert.assertEquals(c, (int) actual.charAt(i));
-            i++;
-        }
-
-        reader.close();
+        final String actualResult = builder.toString();
+        TestUtil.compareToFile(actualResult, path, ((actual, expected) -> Assert.assertEquals(expected, actual)));
     }
 }

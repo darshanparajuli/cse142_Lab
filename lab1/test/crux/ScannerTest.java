@@ -4,8 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import util.TestUtil;
 
-import java.io.BufferedReader;
 import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,14 +49,14 @@ public class ScannerTest {
         final Path path = Paths.get(expectedPath);
         final Scanner scanner = new Scanner(new FileReader(this.path));
 
-        final BufferedReader reader = Files.newBufferedReader(path);
-        for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-            final Token actual = scanner.next();
-            if (actual == null) {
-                throw new AssertionError("token is null");
-            }
-            Assert.assertEquals(line, actual.toString());
+        final StringBuilder builder = new StringBuilder();
+        for (Token t : scanner) {
+            builder.append(t.toString());
+            builder.append("\n");
         }
+
+        final String actualResult = builder.toString();
+        TestUtil.compareToFile(actualResult, path, (actual, expected) -> Assert.assertEquals(expected, actual));
     }
 
 }
