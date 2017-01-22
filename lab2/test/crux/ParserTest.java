@@ -5,12 +5,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,30 +51,27 @@ public class ParserTest {
         final Parser parser = new Parser(scanner);
         parser.parse();
 
-        final List<String> actual = new ArrayList<>();
-        final List<String> expected = Files.readAllLines(path);
+        final StringBuilder builder = new StringBuilder();
 
         if (parser.hasError()) {
-            actual.add("Error parsing file.");
-            actual.addAll(Arrays.asList(parser.errorReport().split("\n")));
+            builder.append("Error parsing file.\n");
+            builder.append(parser.errorReport());
         } else {
-            actual.addAll(Arrays.asList(parser.parseTreeReport().split("\n")));
+            builder.append(parser.parseTreeReport());
+        }
+        builder.append("\n");
+
+        final String actual = builder.toString();
+
+        final BufferedReader reader = Files.newBufferedReader(path);
+
+        int i = 0;
+        int c;
+        while ((c = reader.read()) != -1) {
+            Assert.assertEquals(c, (int) actual.charAt(i));
+            i++;
         }
 
-        for (int i = actual.size() - 1; i >= 0; i--) {
-            if (actual.get(i).isEmpty()) {
-                actual.remove(i);
-                break;
-            }
-        }
-
-        for (int i = expected.size() - 1; i >= 0; i--) {
-            if (expected.get(i).isEmpty()) {
-                expected.remove(i);
-                break;
-            }
-        }
-
-        Assert.assertArrayEquals(expected.toArray(), actual.toArray());
+        reader.close();
     }
 }

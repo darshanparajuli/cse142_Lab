@@ -49,8 +49,6 @@ public class ScannerTest {
         final Path path = Paths.get(expectedPath);
         final Scanner scanner = new Scanner(new FileReader(this.path));
 
-
-
         final BufferedReader reader = Files.newBufferedReader(path);
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
             final Token actual = scanner.next();
