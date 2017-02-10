@@ -1,6 +1,6 @@
 package crux;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SymbolTable {
@@ -13,7 +13,7 @@ public class SymbolTable {
     public SymbolTable() {
         parent = null;
         depth = 0;
-        map = new HashMap<>();
+        map = new LinkedHashMap<>();
     }
 
     public Symbol lookup(String name) throws SymbolNotFoundError {

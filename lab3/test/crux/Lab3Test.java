@@ -54,7 +54,8 @@ public class Lab3Test {
         final StringBuilder builder = new StringBuilder();
         if (parser.hasError()) {
             builder.append("Error parsing file.\n")
-                    .append(parser.errorReport());
+                    .append(parser.errorReport())
+                    .append("\n");
         } else {
             builder.append("Crux program successfully parsed.\n");
         }

@@ -29,6 +29,12 @@ public class Parser {
 
     private void initSymbolTable() {
         symbolTable = SymbolTable.pushSymbolTable(symbolTable);
+        symbolTable.insert("readInt");
+        symbolTable.insert("readFloat");
+        symbolTable.insert("printBool");
+        symbolTable.insert("printInt");
+        symbolTable.insert("printFloat");
+        symbolTable.insert("println");
     }
 
     private void enterScope() {
@@ -188,14 +194,14 @@ public class Parser {
 
     /********************************************** Grammar Rules ****************************************************/
 
-    // literal := INTEGER | FLOAT | TRUE | FALSE .
+    // literal :1= INTEGER | FLOAT | TRUE | FALSE .
     private void literal() {
         expect(NonTerminal.LITERAL);
     }
 
     // designator := IDENTIFIER { "[" expression0 "]" } .
     private void designator() {
-        expect(Token.Kind.IDENTIFIER);
+        tryResolveSymbol(expectRetrieve(Token.Kind.IDENTIFIER));
         while (accept(Token.Kind.OPEN_BRACKET)) {
             expression0();
             expect(Token.Kind.CLOSE_BRACKET);
@@ -272,7 +278,7 @@ public class Parser {
     // call-expression := "::" IDENTIFIER "(" expression-list ")" .
     private void call_expression() {
         expect(Token.Kind.CALL);
-        expect(Token.Kind.IDENTIFIER);
+        tryResolveSymbol(expectRetrieve(Token.Kind.IDENTIFIER));
         expect(Token.Kind.OPEN_PAREN);
         expression_list();
         expect(Token.Kind.CLOSE_PAREN);
@@ -289,7 +295,7 @@ public class Parser {
 
     // parameter := IDENTIFIER ":" type .
     private void parameter() {
-        expect(Token.Kind.IDENTIFIER);
+        tryDeclareSymbol(expectRetrieve(Token.Kind.IDENTIFIER));
         expect(Token.Kind.COLON);
         type();
     }
@@ -306,7 +312,7 @@ public class Parser {
     // variable-declaration := "var" IDENTIFIER ":" type ";" .
     private void variable_declaration() {
         expect(Token.Kind.VAR);
-        expect(Token.Kind.IDENTIFIER);
+        tryDeclareSymbol(expectRetrieve(Token.Kind.IDENTIFIER));
         expect(Token.Kind.COLON);
         type();
         expect(Token.Kind.SEMICOLON);
@@ -315,7 +321,7 @@ public class Parser {
     // array-declaration := "array" IDENTIFIER ":" type "[" INTEGER "]" { "[" INTEGER "]" } ";" .
     private void array_declaration() {
         expect(NonTerminal.ARRAY_DECLARATION);
-        expect(Token.Kind.IDENTIFIER);
+        tryDeclareSymbol(expectRetrieve(Token.Kind.IDENTIFIER));
         expect(Token.Kind.COLON);
         type();
         expect(Token.Kind.OPEN_BRACKET);
@@ -332,13 +338,15 @@ public class Parser {
     // function-definition := "func" IDENTIFIER "(" parameter-list ")" ":" type statement-block .
     private void function_definition() {
         expect(Token.Kind.FUNC);
-        expect(Token.Kind.IDENTIFIER);
+        tryDeclareSymbol(expectRetrieve(Token.Kind.IDENTIFIER));
         expect(Token.Kind.OPEN_PAREN);
+        enterScope();
         parameter_list();
         expect(Token.Kind.CLOSE_PAREN);
         expect(Token.Kind.COLON);
         type();
         statement_block();
+        exitScope();
     }
 
     // declaration := variable-declaration | array-declaration | function-definition .
@@ -378,9 +386,13 @@ public class Parser {
     private void if_statement() {
         expect(Token.Kind.IF);
         expression0();
+        enterScope();
         statement_block();
+        exitScope();
         if (accept(Token.Kind.ELSE)) {
+            enterScope();
             statement_block();
+            exitScope();
         }
     }
 
@@ -388,7 +400,9 @@ public class Parser {
     private void while_statement() {
         expect(Token.Kind.WHILE);
         expression0();
+        enterScope();
         statement_block();
+        exitScope();
     }
 
     // return-statement := "return" expression0 ";" .
