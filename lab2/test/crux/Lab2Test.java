@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RunWith(Parameterized.class)
-public class ScannerTest {
+public class Lab2Test {
 
     @Parameterized.Parameter
     public String path;
@@ -30,7 +30,7 @@ public class ScannerTest {
     public static Collection<Object[]> data() throws Exception {
         final List<Object[]> list = new ArrayList<>();
 
-        final Path path = Paths.get(ScannerTest.class.getResource("test_files").toURI());
+        final Path path = Paths.get(Lab2Test.class.getResource("test_files").toURI());
         Files.list(path)
                 .filter(p -> p.toString().endsWith(".crx"))
                 .forEach(p -> {
@@ -45,18 +45,23 @@ public class ScannerTest {
     }
 
     @Test
-    public void testScanner() throws Exception {
+    public void testParser() throws Exception {
         final Path path = Paths.get(expectedPath);
         final Scanner scanner = new Scanner(new FileReader(this.path));
+        final Parser parser = new Parser(scanner);
+        parser.parse();
 
         final StringBuilder builder = new StringBuilder();
-        for (Token t : scanner) {
-            builder.append(t.toString());
-            builder.append("\n");
+
+        if (parser.hasError()) {
+            builder.append("Error parsing file.\n");
+            builder.append(parser.errorReport());
+        } else {
+            builder.append(parser.parseTreeReport());
         }
+        builder.append("\n");
 
         final String actualResult = builder.toString();
-        TestUtil.compareToFile(actualResult, path, (actual, expected) -> Assert.assertEquals(expected, actual));
+        TestUtil.compareToFile(actualResult, path, ((actual, expected) -> Assert.assertEquals(expected, actual)));
     }
-
 }
