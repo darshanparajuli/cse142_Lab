@@ -60,17 +60,20 @@ public class SymbolTable {
         return sb.toString();
     }
 
-    static SymbolTable pushSymbolTable(SymbolTable parent) {
-        final SymbolTable symbolTable = new SymbolTable();
-        if (parent != null) {
-            symbolTable.parent = parent;
-            symbolTable.depth = parent.depth + 1;
-        }
-        return symbolTable;
+    public void setParent(SymbolTable parent) {
+        this.parent = parent;
     }
 
-    static SymbolTable popSymbolTable(SymbolTable current) {
-        return current.parent;
+    public SymbolTable getParent() {
+        return this.parent;
+    }
+
+    public int getDepth() {
+        return this.depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
     }
 }
 

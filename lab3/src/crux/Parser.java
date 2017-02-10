@@ -7,7 +7,7 @@ public class Parser {
     public static String uciNetID = "dparajul";
 
     // SymbolTable Management ==========================
-    private SymbolTable symbolTable;
+    private SymbolTable currentSymbolTable;
     private StringBuilder errorBuffer;
 
     private Scanner scanner;
@@ -28,28 +28,33 @@ public class Parser {
     }
 
     private void initSymbolTable() {
-        symbolTable = SymbolTable.pushSymbolTable(symbolTable);
-        symbolTable.insert("readInt");
-        symbolTable.insert("readFloat");
-        symbolTable.insert("printBool");
-        symbolTable.insert("printInt");
-        symbolTable.insert("printFloat");
-        symbolTable.insert("println");
+        currentSymbolTable = new SymbolTable();
+        currentSymbolTable.insert("readInt");
+        currentSymbolTable.insert("readFloat");
+        currentSymbolTable.insert("printBool");
+        currentSymbolTable.insert("printInt");
+        currentSymbolTable.insert("printFloat");
+        currentSymbolTable.insert("println");
     }
 
     private void enterScope() {
-        symbolTable = SymbolTable.pushSymbolTable(symbolTable);
+        final SymbolTable newSymbolTable = new SymbolTable();
+        if (currentSymbolTable != null) {
+            newSymbolTable.setParent(currentSymbolTable);
+            newSymbolTable.setDepth(currentSymbolTable.getDepth() + 1);
+        }
+        currentSymbolTable = newSymbolTable;
     }
 
     private void exitScope() {
-        symbolTable = SymbolTable.popSymbolTable(symbolTable);
+        currentSymbolTable = currentSymbolTable.getParent();
     }
 
     private Symbol tryResolveSymbol(Token ident) {
         assert (ident.is(Token.Kind.IDENTIFIER));
         String name = ident.lexeme();
         try {
-            return symbolTable.lookup(name);
+            return currentSymbolTable.lookup(name);
         } catch (SymbolNotFoundError e) {
             String message = reportResolveSymbolError(name, ident.lineNumber(), ident.charPosition());
             return new ErrorSymbol(message);
@@ -60,7 +65,7 @@ public class Parser {
         String message = "ResolveSymbolError(" + lineNum + "," + charPos + ")[Could not find " + name + ".]";
         errorBuffer.append(message)
                 .append("\n");
-        errorBuffer.append(symbolTable.toString())
+        errorBuffer.append(currentSymbolTable.toString())
                 .append("\n");
         return message;
     }
@@ -69,7 +74,7 @@ public class Parser {
         assert (ident.is(Token.Kind.IDENTIFIER));
         String name = ident.lexeme();
         try {
-            return symbolTable.insert(name);
+            return currentSymbolTable.insert(name);
         } catch (RedeclarationError re) {
             String message = reportDeclareSymbolError(name, ident.lineNumber(), ident.charPosition());
             return new ErrorSymbol(message);
@@ -80,7 +85,7 @@ public class Parser {
         String message = "DeclareSymbolError(" + lineNum + "," + charPos + ")[" + name + " already exists.]";
         errorBuffer.append(message)
                 .append("\n");
-        errorBuffer.append(symbolTable.toString())
+        errorBuffer.append(currentSymbolTable.toString())
                 .append("\n");
         return message;
     }
