@@ -11,14 +11,5 @@
     <orderEntry type="library" scope="TEST" name="junit" level="application" />
     <orderEntry type="library" scope="TEST" name="hamcrest" level="application" />
     <orderEntry type="module" module-name="Lab" exported="" />
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES />
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/test/crux/test_files" />
-        </SOURCES>
-      </library>
-    </orderEntry>
   </component>
 </module>
