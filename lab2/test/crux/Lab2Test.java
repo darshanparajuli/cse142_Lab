@@ -54,10 +54,12 @@ public class Lab2Test {
         final StringBuilder builder = new StringBuilder();
 
         if (parser.hasError()) {
-            builder.append("Error parsing file.\n");
-            builder.append(parser.errorReport());
+            builder.append("Error parsing file.\n")
+                    .append(parser.errorReport())
+                    .append("\n");
         } else {
-            builder.append(parser.parseTreeReport());
+            builder.append(parser.parseTreeReport())
+                    .append("\n");
         }
         builder.append("\n");
 

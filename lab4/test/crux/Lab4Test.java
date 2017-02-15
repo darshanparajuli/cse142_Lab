@@ -1,5 +1,6 @@
 package crux;
 
+import ast.PrettyPrinter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,6 +8,7 @@ import org.junit.runners.Parameterized;
 import util.TestUtil;
 
 import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +17,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RunWith(Parameterized.class)
-public class Lab1Test {
+public class Lab4Test {
 
     @Parameterized.Parameter
     public String path;
@@ -30,7 +32,7 @@ public class Lab1Test {
     public static Collection<Object[]> data() throws Exception {
         final List<Object[]> list = new ArrayList<>();
 
-        final Path path = Paths.get(Lab1Test.class.getResource("test_files").toURI());
+        final Path path = Paths.get(Lab4Test.class.getResource("test_files").toURI());
         Files.list(path)
                 .filter(p -> p.toString().endsWith(".crx"))
                 .forEach(p -> {
@@ -45,18 +47,32 @@ public class Lab1Test {
     }
 
     @Test
-    public void testScanner() throws Exception {
+    public void testParser() throws Exception {
         final Path path = Paths.get(expectedPath);
-        final Scanner scanner = new Scanner(new FileReader(this.path));
-
-        final StringBuilder builder = new StringBuilder();
-        for (Token t : scanner) {
-            builder.append(t.toString())
-                    .append("\n");
-        }
-
-        final String actualResult = builder.toString();
-        TestUtil.compareToFile(actualResult, path, (actual, expected) -> Assert.assertEquals(expected, actual));
+        final String actualResult = runParser(path.toString());
+        TestUtil.compareToFile(actualResult, path, ((actual, expected) -> Assert.assertEquals(expected, actual)));
     }
 
+    private String runParser(String sourceFilename) {
+        Scanner s = null;
+        try {
+            s = new Scanner(new FileReader(path));
+        } catch (IOException e) {
+            return "Error accessing the source file: \"" + sourceFilename + "\"";
+        }
+
+        Parser p = new Parser(s);
+        ast.Command syntaxTree = p.parse();
+        if (p.hasError()) {
+            return "Error parsing file " +
+                    sourceFilename +
+                    "\n" +
+                    p.errorReport() +
+                    "\n";
+        }
+
+        PrettyPrinter pp = new PrettyPrinter();
+        syntaxTree.accept(pp);
+        return pp.toString() + "\n";
+    }
 }
