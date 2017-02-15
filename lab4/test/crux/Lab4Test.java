@@ -8,7 +8,6 @@ import org.junit.runners.Parameterized;
 import util.TestUtil;
 
 import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,15 +52,9 @@ public class Lab4Test {
         TestUtil.compareToFile(actualResult, path, ((actual, expected) -> Assert.assertEquals(expected, actual)));
     }
 
-    private String runParser(String sourceFilename) {
-        Scanner s = null;
-        try {
-            s = new Scanner(new FileReader(path));
-        } catch (IOException e) {
-            return "Error accessing the source file: \"" + sourceFilename + "\"";
-        }
-
-        Parser p = new Parser(s);
+    private String runParser(String sourceFilename) throws Exception {
+        final Scanner s = new Scanner(new FileReader(path));
+        final Parser p = new Parser(s);
         ast.Command syntaxTree = p.parse();
         if (p.hasError()) {
             return "Error parsing file " +
@@ -71,7 +64,7 @@ public class Lab4Test {
                     "\n";
         }
 
-        PrettyPrinter pp = new PrettyPrinter();
+        final PrettyPrinter pp = new PrettyPrinter();
         syntaxTree.accept(pp);
         return pp.toString() + "\n";
     }

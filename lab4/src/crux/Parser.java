@@ -16,16 +16,11 @@ public class Parser {
     private SymbolTable currentSymbolTable;
     private StringBuilder errorBuffer;
 
-//    private StringBuilder parseTreeBuffer;
-//    private int parseTreeRecursionDepth;
-
     private Scanner scanner;
     private Token currentToken;
 
     public Parser(Scanner scanner) {
         this.scanner = scanner;
-//        parseTreeBuffer = new StringBuilder();
-//        parseTreeRecursionDepth = 0;
         errorBuffer = new StringBuilder();
         currentToken = scanner.next();
     }
@@ -47,22 +42,6 @@ public class Parser {
         currentSymbolTable.insert("printFloat");
         currentSymbolTable.insert("println");
     }
-
-//    public void enterRule(NonTerminal nonTerminal) {
-//        String lineData = "";
-//        for (int i = 0; i < parseTreeRecursionDepth; i++) {
-//            lineData += "  ";
-//        }
-//        lineData += nonTerminal.name();
-//        //System.out.println("descending " + lineData);
-//        parseTreeBuffer.append(lineData)
-//                .append("\n");
-//        parseTreeRecursionDepth++;
-//    }
-//
-//    private void exitRule(NonTerminal nonTerminal) {
-//        parseTreeRecursionDepth--;
-//    }
 
     private void enterScope() {
         final SymbolTable newSymbolTable = new SymbolTable();
@@ -215,7 +194,7 @@ public class Parser {
         try {
             return program();
         } catch (QuitParseException q) {
-            return new ast.Error(lineNumber(), charPosition(), "Could not complete parsing.");
+            return new Error(lineNumber(), charPosition(), "Could not complete parsing.");
         }
     }
 
