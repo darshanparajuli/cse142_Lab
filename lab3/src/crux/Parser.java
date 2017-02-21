@@ -418,6 +418,7 @@ public class Parser {
     }
 
     // statement := variable-declaration
+    //        | array-declaration
     //        | call-statement
     //        | assignment-statement
     //        | if-statement
@@ -426,6 +427,8 @@ public class Parser {
     private void statement() {
         if (have(NonTerminal.VARIABLE_DECLARATION)) {
             variable_declaration();
+        } else if (have(NonTerminal.ARRAY_DECLARATION)) {
+            array_declaration();
         } else if (have(NonTerminal.CALL_STATEMENT)) {
             call_statement();
         } else if (have(NonTerminal.ASSIGNMENT_STATEMENT)) {
