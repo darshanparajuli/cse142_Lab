@@ -496,6 +496,7 @@ public class Parser {
     }
 
     // statement := variable-declaration
+    //        | array-declaration
     //        | call-statement
     //        | assignment-statement
     //        | if-statement
@@ -506,6 +507,8 @@ public class Parser {
         final int charPos = charPosition();
         if (have(NonTerminal.VARIABLE_DECLARATION)) {
             return variable_declaration();
+        } else if (have(NonTerminal.ARRAY_DECLARATION)) {
+            return array_declaration();
         } else if (have(NonTerminal.CALL_STATEMENT)) {
             return call_statement();
         } else if (have(NonTerminal.ASSIGNMENT_STATEMENT)) {
