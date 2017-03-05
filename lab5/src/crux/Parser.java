@@ -219,20 +219,17 @@ public class Parser {
         final int charPos = charPosition();
 
         final Symbol symbol = tryResolveSymbol(expectRetrieve(Token.Kind.IDENTIFIER));
-
         Expression base = new AddressOf(linNum, charPos, symbol);
-        Type baseType = new AddressType(symbol.type());
 
         while (accept(Token.Kind.OPEN_BRACKET)) {
             final int ln = lineNumber();
             final int cp = charPosition();
             final Expression exp0 = expression0();
             base = new Index(ln, cp, base, exp0);
-            baseType = new AddressType(baseType);
+            symbol.setType(new AddressType(symbol.type()));
             expect(Token.Kind.CLOSE_BRACKET);
         }
 
-        symbol.setType(baseType);
         return base;
     }
 

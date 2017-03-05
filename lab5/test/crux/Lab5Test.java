@@ -71,6 +71,6 @@ public class Lab5Test {
                     tc.errorReport() + "\n";
         }
 
-        return "Crux Program is has no type errors.\n";
+        return "Crux Program has no type errors.\n";
     }
 }
