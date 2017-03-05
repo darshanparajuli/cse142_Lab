@@ -219,6 +219,7 @@ public class Parser {
         final int charPos = charPosition();
 
         final Symbol symbol = tryResolveSymbol(expectRetrieve(Token.Kind.IDENTIFIER));
+
         Expression base = new AddressOf(linNum, charPos, symbol);
         Type baseType = new AddressType(symbol.type());
 
