@@ -23,7 +23,7 @@ public class ArrayType extends Type {
         if (!(that instanceof IntType)) {
             return super.index(that);
         }
-        return new IntType();
+        return this.base;
     }
 
     @Override

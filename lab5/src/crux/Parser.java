@@ -6,6 +6,7 @@ import types.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class Parser {
 
@@ -415,6 +416,7 @@ public class Parser {
     private ArrayDeclaration array_declaration() {
         final int linNum = lineNumber();
         final int charPos = charPosition();
+        final Stack<Integer> stack = new Stack<>();
 
         expect(NonTerminal.ARRAY_DECLARATION);
         final Symbol symbol = tryDeclareSymbol(expectRetrieve(Token.Kind.IDENTIFIER));
@@ -422,17 +424,22 @@ public class Parser {
         Type baseType = type();
         expect(Token.Kind.OPEN_BRACKET);
         final Token token = expectRetrieve(Token.Kind.INTEGER);
-        baseType = new ArrayType(Integer.parseInt(token.lexeme()), baseType);
+        stack.push(Integer.parseInt(token.lexeme()));
         expect(Token.Kind.CLOSE_BRACKET);
 
-        for (int i = 0; accept(Token.Kind.OPEN_BRACKET); i++) {
+        while (accept(Token.Kind.OPEN_BRACKET)) {
             final Token t = expectRetrieve(Token.Kind.INTEGER);
-            baseType = new ArrayType(Integer.parseInt(t.lexeme()), baseType);
+            stack.push(Integer.parseInt(t.lexeme()));
             expect(Token.Kind.CLOSE_BRACKET);
         }
         expect(Token.Kind.SEMICOLON);
 
-        symbol.setType(baseType);
+        ArrayType arrayType = new ArrayType(stack.pop(), baseType);
+        while (!stack.empty()) {
+            arrayType = new ArrayType(stack.pop(), arrayType);
+        }
+
+        symbol.setType(arrayType);
         return new ArrayDeclaration(linNum, charPos, symbol);
     }
 

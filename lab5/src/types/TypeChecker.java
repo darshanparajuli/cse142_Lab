@@ -270,11 +270,17 @@ public class TypeChecker implements CommandVisitor {
     @Override
     public void visit(Index node) {
         node.base().accept(this);
-        final Type baseType = getType(node.base());
+        Type baseType = getType(node.base());
         node.amount().accept(this);
         final Type amountType = getType(node.amount());
 
-        final Type type = baseType.index(amountType);
+        final Type type;
+        if (baseType instanceof AddressType && ((AddressType) baseType).base() instanceof ArrayType) {
+            type = new AddressType(((AddressType) baseType).base().index(amountType));
+        } else {
+            type = baseType.index(amountType);
+        }
+        
         put(node, type);
     }
 
