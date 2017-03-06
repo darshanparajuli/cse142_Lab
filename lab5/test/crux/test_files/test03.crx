@@ -1,6 +1,6 @@
 // test return type matches function
 
-func myInt(a:int, b:float) : int {
+func myInt(a:int) : int {
   return a;
 }
 
