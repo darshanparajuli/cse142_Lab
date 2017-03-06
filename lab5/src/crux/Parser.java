@@ -36,12 +36,51 @@ public class Parser {
 
     private void initSymbolTable() {
         currentSymbolTable = new SymbolTable();
-        currentSymbolTable.insert("readInt");
-        currentSymbolTable.insert("readFloat");
-        currentSymbolTable.insert("printBool");
-        currentSymbolTable.insert("printInt");
-        currentSymbolTable.insert("printFloat");
-        currentSymbolTable.insert("println");
+        insertSymbolReadInt();
+        insertSymbolReadFloat();
+        insertSymbolPrintBool();
+        insertSymbolPrintInt();
+        insertSymbolPrintFloat();
+        insertSymbolPrintln();
+    }
+
+    private void insertSymbolReadInt() {
+        final Symbol symbol = currentSymbolTable.insert("readInt");
+        final TypeList args = new TypeList();
+        symbol.setType(new FuncType(args, new IntType()));
+    }
+
+    private void insertSymbolReadFloat() {
+        final Symbol symbol = currentSymbolTable.insert("readFloat");
+        final TypeList args = new TypeList();
+        symbol.setType(new FuncType(args, new FloatType()));
+    }
+
+    private void insertSymbolPrintBool() {
+        final Symbol symbol = currentSymbolTable.insert("printBool");
+        final TypeList args = new TypeList();
+        args.append(new BoolType());
+        symbol.setType(new FuncType(args, new VoidType()));
+    }
+
+    private void insertSymbolPrintInt() {
+        final Symbol symbol = currentSymbolTable.insert("printInt");
+        final TypeList args = new TypeList();
+        args.append(new IntType());
+        symbol.setType(new FuncType(args, new VoidType()));
+    }
+
+    private void insertSymbolPrintFloat() {
+        final Symbol symbol = currentSymbolTable.insert("printFloat");
+        final TypeList args = new TypeList();
+        args.append(new FloatType());
+        symbol.setType(new FuncType(args, new VoidType()));
+    }
+
+    private void insertSymbolPrintln() {
+        final Symbol symbol = currentSymbolTable.insert("println");
+        final TypeList args = new TypeList();
+        symbol.setType(new FuncType(args, new VoidType()));
     }
 
     private void enterScope() {
@@ -226,7 +265,6 @@ public class Parser {
             final int cp = charPosition();
             final Expression exp0 = expression0();
             base = new Index(ln, cp, base, exp0);
-            symbol.setType(new AddressType(symbol.type()));
             expect(Token.Kind.CLOSE_BRACKET);
         }
 
@@ -383,12 +421,13 @@ public class Parser {
         expect(Token.Kind.COLON);
         Type baseType = type();
         expect(Token.Kind.OPEN_BRACKET);
-        expect(Token.Kind.INTEGER);
+        final Token token = expectRetrieve(Token.Kind.INTEGER);
+        baseType = new ArrayType(Integer.parseInt(token.lexeme()), baseType);
         expect(Token.Kind.CLOSE_BRACKET);
 
         for (int i = 0; accept(Token.Kind.OPEN_BRACKET); i++) {
-            expect(Token.Kind.INTEGER);
-            baseType = new ArrayType(i, baseType);
+            final Token t = expectRetrieve(Token.Kind.INTEGER);
+            baseType = new ArrayType(Integer.parseInt(t.lexeme()), baseType);
             expect(Token.Kind.CLOSE_BRACKET);
         }
         expect(Token.Kind.SEMICOLON);

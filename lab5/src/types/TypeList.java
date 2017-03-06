@@ -16,6 +16,10 @@ public class TypeList extends Type implements Iterable<Type> {
         list.add(type);
     }
 
+    public int count() {
+        return list.size();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -40,14 +40,6 @@ public class BoolType extends Type {
     }
 
     @Override
-    public Type compare(Type that) {
-        if (!(that instanceof BoolType)) {
-            return super.compare(that);
-        }
-        return new BoolType();
-    }
-
-    @Override
     public boolean equivalent(Type that) {
         if (that == null)
             return false;

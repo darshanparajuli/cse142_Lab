@@ -23,6 +23,14 @@ public class AddressType extends Type {
     }
 
     @Override
+    public Type assign(Type source) {
+        if (source instanceof VoidType || source instanceof ErrorType) {
+            return super.assign(source);
+        }
+        return new AddressType(source);
+    }
+
+    @Override
     public boolean equivalent(Type that) {
         if (that == null)
             return false;

@@ -35,7 +35,7 @@ public class ArrayType extends Type {
     public boolean equivalent(Type that) {
         if (that == null)
             return false;
-        if (!(that instanceof IntType))
+        if (!(that instanceof ArrayType))
             return false;
 
         ArrayType aType = (ArrayType) that;
