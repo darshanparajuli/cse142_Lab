@@ -28,7 +28,7 @@ public class TypeChecker implements CommandVisitor {
      * "Array " + arrayName + " has invalid base type " + baseType + "."
      */
 
-    private Symbol lastFuncSymbol;
+    private Symbol currentFunction;
 
     public TypeChecker() {
         typeMap = new HashMap<>();
@@ -144,8 +144,6 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(FunctionDefinition node) {
-        lastFuncSymbol = node.function();
-
         final FuncType funcType = (FuncType) node.function().type();
         final Type returnType = funcType.returnType();
         final TypeList argsType = funcType.arguments();
@@ -171,6 +169,7 @@ public class TypeChecker implements CommandVisitor {
             }
         }
 
+        currentFunction = node.function();
         node.body().accept(this);
 
         if (!(returnType instanceof VoidType)) {
@@ -280,7 +279,7 @@ public class TypeChecker implements CommandVisitor {
         } else {
             type = baseType.index(amountType);
         }
-        
+
         put(node, type);
     }
 
@@ -327,16 +326,17 @@ public class TypeChecker implements CommandVisitor {
     @Override
     public void visit(Return node) {
         node.argument().accept(this);
-        final Type type = getType(node.argument());
 
-        final FuncType funcType = (FuncType) lastFuncSymbol.type();
-        if (!lastFuncSymbol.name().equals("main") && !type.equivalent(funcType.returnType())) {
-            put(node, new ErrorType("Function " + lastFuncSymbol.name()
+        final Type retType = getType(node.argument());
+        final FuncType funcType = (FuncType) currentFunction.type();
+        if (!retType.equivalent(funcType.returnType())) {
+            put(node, new ErrorType("Function " + currentFunction.name()
                     + " returns " + funcType.returnType()
-                    + " not " + "" + type + "."));
+                    + " not " + retType + "."));
         } else {
-            put(node, type);
+            put(node, retType);
         }
+
     }
 
     @Override
