@@ -1,5 +1,9 @@
 package crux;
 
+import mips.CodeGen;
+import mips.Program;
+import types.TypeChecker;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -31,7 +35,7 @@ public class Compiler {
             System.exit(-3);
         }
 
-        types.TypeChecker tc = new types.TypeChecker();
+        TypeChecker tc = new TypeChecker();
         tc.check(syntaxTree);
         if (tc.hasError()) {
             System.out.println("Error type-checking file " + sourceFilename);
@@ -39,7 +43,7 @@ public class Compiler {
             System.exit(-4);
         }
 
-        mips.CodeGen cg = new mips.CodeGen(tc);
+        CodeGen cg = new CodeGen(tc);
         cg.generate(syntaxTree);
         if (cg.hasError()) {
             System.out.println("Error generating code for file " + sourceFilename);
@@ -49,7 +53,7 @@ public class Compiler {
 
         String asmFilename = sourceFilename.replace(".crx", ".asm");
         try {
-            mips.Program prog = cg.getProgram();
+            Program prog = cg.getProgram();
             File asmFile = new File(asmFilename);
             PrintStream ps = new PrintStream(asmFile);
             prog.print(ps);

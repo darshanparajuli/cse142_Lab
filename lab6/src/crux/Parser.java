@@ -421,7 +421,7 @@ public class Parser {
         expect(NonTerminal.ARRAY_DECLARATION);
         final Symbol symbol = tryDeclareSymbol(expectRetrieve(Token.Kind.IDENTIFIER));
         expect(Token.Kind.COLON);
-        Type baseType = type();
+        final Type baseType = type();
         expect(Token.Kind.OPEN_BRACKET);
         final Token token = expectRetrieve(Token.Kind.INTEGER);
         stack.push(Integer.parseInt(token.lexeme()));

@@ -54,7 +54,7 @@ public class TypeChecker implements CommandVisitor {
         typeMap.put(node, type);
     }
 
-    private Type getType(Visitable node) {
+    public Type getType(Visitable node) {
         return typeMap.get(node);
     }
 

@@ -2,25 +2,32 @@ package mips;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class Program {
 
-    private Vector<String> codeSegment;
-    private Vector<String> dataSegment;
+    private ArrayList<String> codeSegment;
+    private ArrayList<String> dataSegment;
 
     private int labelCounter;
 
     public Program() {
         labelCounter = -1;
-        codeSegment = new Vector<String>();
-        dataSegment = new Vector<String>();
+        codeSegment = new ArrayList<>();
+        dataSegment = new ArrayList<>();
     }
 
     // Returns a unique label
     public String newLabel() {
         labelCounter++;
         return "label." + labelCounter;
+    }
+
+    public String newFuncLabel(String name) {
+        if (name.equals("main")) {
+            return "main";
+        } else {
+            return "func." + name;
+        }
     }
 
     // Insert an instruction into the code segment
@@ -48,34 +55,46 @@ public class Program {
 
     // Push an integer register on the stack
     public void pushInt(String reg) {
-        throw new RuntimeException("Implement pushing int register value to stack");
+        codeSegment.add("subu $sp, $sp, 4");
+        codeSegment.add(String.format("sw %s, 0($sp)", reg));
     }
 
     // Push a single precision floating point register on the stack
     public void pushFloat(String reg) {
-        throw new RuntimeException("Implement pushing float register value to stack");
+        codeSegment.add("subu $sp, $sp, 4");
+        codeSegment.add(String.format("s.s %s, 0($sp)", reg));
     }
 
     // Pop an integer from the stack into register reg
     public void popInt(String reg) {
-        throw new RuntimeException("Implement popping int from stack to register");
+        codeSegment.add(String.format("lw %s, 0($sp)", reg));
+        codeSegment.add("addi $sp, $sp, 4");
     }
 
     // Pop a floating point value from the stack into register reg
     public void popFloat(String reg) {
-        throw new RuntimeException("Implement popping floating point from stack to register");
+        codeSegment.add(String.format("l.s %s, 0($sp)", reg));
+        codeSegment.add("addi $sp, $sp, 4");
     }
 
     // Insert a function prologue at position pos
     public void insertPrologue(int pos, int frameSize) {
-        ArrayList<String> prologue = new ArrayList<String>();
-        throw new RuntimeException("Implement creation of function prologue");
+        final ArrayList<String> prologue = new ArrayList<>();
+        prologue.add("subu $sp, $sp, 8");
+        prologue.add("sw   $fp, 0($sp)");
+        prologue.add("sw   $ra, 4($sp)");
+        prologue.add("addi $fp, $sp, 8");
+        prologue.add("subu $sp, $sp, " + frameSize);
         codeSegment.addAll(pos, prologue);
     }
 
     // Append a function epilogue
     public void appendEpilogue(int frameSize) {
-        throw new RuntimeException("Implement creation of function epilogue");
+        codeSegment.add("addu $sp, $sp, " + frameSize);
+        codeSegment.add("lw   $ra, 4($sp)");
+        codeSegment.add("lw   $fp, 0($sp)");
+        codeSegment.add("addu $sp, $sp, 8");
+        codeSegment.add("jr   $ra");
     }
 
     // Insert code that terminates the program

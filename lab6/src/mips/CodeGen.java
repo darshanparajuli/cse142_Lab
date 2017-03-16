@@ -1,9 +1,10 @@
 package mips;
 
 import ast.*;
+import ast.Error;
 import types.TypeChecker;
 
-public class CodeGen implements ast.CommandVisitor {
+public class CodeGen implements CommandVisitor {
 
     private StringBuffer errorBuffer = new StringBuffer();
     private TypeChecker tc;
@@ -48,132 +49,193 @@ public class CodeGen implements ast.CommandVisitor {
 
     @Override
     public void visit(ExpressionList node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        for (Expression expression : node) {
+            expression.accept(this);
+        }
     }
 
     @Override
     public void visit(DeclarationList node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        for (Declaration declaration : node) {
+            declaration.accept(this);
+        }
     }
 
     @Override
     public void visit(StatementList node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        for (Statement statement : node) {
+            statement.accept(this);
+        }
+
     }
 
     @Override
     public void visit(AddressOf node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
     }
 
     @Override
     public void visit(LiteralBool node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        final int val = node.value() == LiteralBool.Value.FALSE ? 0 : 1;
+        program.appendInstruction("li $t0, " + val);
+        program.pushInt("$t0");
     }
 
     @Override
     public void visit(LiteralFloat node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        program.appendInstruction("li $f0, " + node.value());
+        program.pushFloat("$f0");
     }
 
     @Override
     public void visit(LiteralInt node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        program.appendInstruction("li $t0, " + node.value());
+        program.pushInt("$t0");
     }
 
     @Override
     public void visit(VariableDeclaration node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        currentFunction.add(program, node);
     }
 
     @Override
     public void visit(ArrayDeclaration node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        currentFunction.add(program, node);
     }
 
     @Override
     public void visit(FunctionDefinition node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        final String name = node.function().name();
+        currentFunction = new ActivationRecord(node, currentFunction);
+        final int pos = program.appendInstruction(program.newFuncLabel(name) + ":");
+        node.body().accept(this);
+        program.insertPrologue(pos, currentFunction.stackSize());
+        if (name.equals("main")) {
+            program.appendExitSequence();
+        } else {
+            program.appendEpilogue(currentFunction.stackSize());
+        }
+        if (currentFunction.parent() != null) {
+            currentFunction = currentFunction.parent();
+        }
     }
 
     @Override
     public void visit(Addition node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.leftSide().accept(this);
+        node.rightSide().accept(this);
     }
 
     @Override
     public void visit(Subtraction node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.leftSide().accept(this);
+        node.rightSide().accept(this);
     }
 
     @Override
     public void visit(Multiplication node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.leftSide().accept(this);
+        node.rightSide().accept(this);
     }
 
     @Override
     public void visit(Division node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.leftSide().accept(this);
+        node.rightSide().accept(this);
     }
 
     @Override
     public void visit(LogicalAnd node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.leftSide().accept(this);
+        node.rightSide().accept(this);
     }
 
     @Override
     public void visit(LogicalOr node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.leftSide().accept(this);
+        node.rightSide().accept(this);
     }
 
     @Override
     public void visit(LogicalNot node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.expression().accept(this);
     }
 
     @Override
     public void visit(Comparison node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.leftSide().accept(this);
+        node.rightSide().accept(this);
     }
 
     @Override
     public void visit(Dereference node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.expression().accept(this);
     }
 
     @Override
     public void visit(Index node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.base().accept(this);
+        node.amount().accept(this);
     }
 
     @Override
     public void visit(Assignment node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.destination().accept(this);
+        node.source().accept(this);
     }
 
     @Override
     public void visit(Call node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.arguments().accept(this);
+        program.appendInstruction("jal " + program.newFuncLabel(node.function().name()));
     }
 
     @Override
     public void visit(IfElseBranch node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.condition().accept(this);
+        node.thenBlock().accept(this);
+        node.elseBlock().accept(this);
     }
 
     @Override
     public void visit(WhileLoop node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.condition().accept(this);
+        node.body().accept(this);
     }
 
     @Override
     public void visit(Return node) {
-        throw new RuntimeException("Implement this");
+        System.out.println(node);
+        node.argument().accept(this);
     }
 
     @Override
-    public void visit(ast.Error node) {
-        String message = "CodeGen cannot compile a " + node);
+    public void visit(Error node) {
+        System.out.println(node);
+        String message = "CodeGen cannot compile a " + node.toString();
         errorBuffer.append(message);
         throw new CodeGenException(message);
     }
