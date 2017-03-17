@@ -124,16 +124,12 @@ public class CodeGen implements CommandVisitor {
 
     @Override
     public void visit(VariableDeclaration node) {
-//        program.appendInstruction(String.format("%24s %s", "#begin", node));
         currentActivationRecord.add(program, node);
-//        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(ArrayDeclaration node) {
-//        program.appendInstruction(String.format("%24s %s", "#begin", node));
         currentActivationRecord.add(program, node);
-//        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
