@@ -372,7 +372,7 @@ public class CodeGen implements CommandVisitor {
 
         final AddressType baseType = (AddressType) tc.getType(node);
 
-        program.popInt("$t2"); //
+        program.popInt("$t2");
         program.popInt("$t1");
         program.appendInstruction("li $t3, " + ActivationRecord.numBytes(baseType.base()));
         program.appendInstruction("mul $t2, $t2, $t3");
