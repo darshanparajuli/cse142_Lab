@@ -75,6 +75,14 @@ public class CodeGen implements CommandVisitor {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         for (Statement statement : node) {
             statement.accept(this);
+            final Type type = tc.getType(statement);
+            if (type != null && !(type instanceof AddressType) && !(type instanceof VoidType)) {
+                if (type instanceof FloatType) {
+                    program.popFloat("$t0");
+                } else {
+                    program.popInt("$t1");
+                }
+            }
         }
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
@@ -114,12 +122,16 @@ public class CodeGen implements CommandVisitor {
 
     @Override
     public void visit(VariableDeclaration node) {
+//        program.appendInstruction(String.format("%24s %s", "#begin", node));
         currentActivationRecord.add(program, node);
+//        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(ArrayDeclaration node) {
+//        program.appendInstruction(String.format("%24s %s", "#begin", node));
         currentActivationRecord.add(program, node);
+//        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
@@ -141,6 +153,20 @@ public class CodeGen implements CommandVisitor {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+
+        final Type type = tc.getType(node);
+        if (type instanceof FloatType) {
+            program.popFloat("$f1");
+            program.popFloat("$f0");
+            program.appendInstruction("add.s $f0, $f0, $f1");
+            program.pushFloat("$f0");
+        } else {
+            program.popInt("$t1");
+            program.popInt("$t0");
+            program.appendInstruction("add $t0, $t0, $t1");
+            program.pushInt("$t0");
+        }
+
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
@@ -149,6 +175,20 @@ public class CodeGen implements CommandVisitor {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+
+        final Type type = tc.getType(node);
+        if (type instanceof FloatType) {
+            program.popFloat("$f1");
+            program.popFloat("$f0");
+            program.appendInstruction("sub.s $f0, $f0, $f1");
+            program.pushFloat("$f0");
+        } else {
+            program.popInt("$t1");
+            program.popInt("$t0");
+            program.appendInstruction("sub $t0, $t0, $t1");
+            program.pushInt("$t0");
+        }
+
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
@@ -157,6 +197,20 @@ public class CodeGen implements CommandVisitor {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+
+        final Type type = tc.getType(node);
+        if (type instanceof FloatType) {
+            program.popFloat("$f1");
+            program.popFloat("$f0");
+            program.appendInstruction("mul.s $f0, $f0, $f1");
+            program.pushFloat("$f0");
+        } else {
+            program.popInt("$t1");
+            program.popInt("$t0");
+            program.appendInstruction("mul $t0, $t0, $t1");
+            program.pushInt("$t0");
+        }
+
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
@@ -165,6 +219,20 @@ public class CodeGen implements CommandVisitor {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+
+        final Type type = tc.getType(node);
+        if (type instanceof FloatType) {
+            program.popFloat("$f1");
+            program.popFloat("$f0");
+            program.appendInstruction("div.s $f0, $f0, $f1");
+            program.pushFloat("$f0");
+        } else {
+            program.popInt("$t1");
+            program.popInt("$t0");
+            program.appendInstruction("div $t0, $t0, $t1");
+            program.pushInt("$t0");
+        }
+
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
@@ -173,6 +241,12 @@ public class CodeGen implements CommandVisitor {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+
+        program.popInt("$t1");
+        program.popInt("$t0");
+        program.appendInstruction("and $t0, $t0, $t1");
+        program.pushInt("$t0");
+
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
@@ -181,6 +255,12 @@ public class CodeGen implements CommandVisitor {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+
+        program.popInt("$t1");
+        program.popInt("$t0");
+        program.appendInstruction("or $t0, $t0, $t1");
+        program.pushInt("$t0");
+
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
@@ -188,6 +268,11 @@ public class CodeGen implements CommandVisitor {
     public void visit(LogicalNot node) {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.expression().accept(this);
+
+        program.popInt("$t0");
+        program.appendInstruction("nor $t0, $t0, $0");
+        program.pushInt("$t0");
+
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
@@ -196,6 +281,39 @@ public class CodeGen implements CommandVisitor {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+
+        final Type type = tc.getType(node);
+        if (type instanceof FloatType) {
+            program.popFloat("$f1");
+            program.popFloat("$f0");
+        } else {
+            program.popInt("$t1");
+            program.popInt("$t0");
+        }
+
+        switch (node.operation()) {
+            case EQ: {
+            }
+            break;
+            case GE: {
+
+            }
+            break;
+            case LE: {
+
+            }
+            break;
+
+            case GT: {
+
+            }
+            case LT: {
+
+            }
+        }
+
+        program.pushInt("$t0");
+
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
@@ -234,11 +352,8 @@ public class CodeGen implements CommandVisitor {
         node.destination().accept(this);
         node.source().accept(this);
 
-        program.appendInstruction("lw $t1, 0($sp)");
-        program.appendInstruction("addi $sp, $sp, 4");
-        program.appendInstruction("lw $t2, 0($sp)");
-        program.appendInstruction("addi $sp, $sp, 4");
-
+        program.popInt("$t1");
+        program.popInt("$t2");
         program.appendInstruction("sw $t1, 0($t2)");
 
         program.appendInstruction(String.format("%24s %s", "#end", node));
@@ -257,8 +372,11 @@ public class CodeGen implements CommandVisitor {
 
         final Type ret = funcType.call(argType);
         if (!(ret instanceof VoidType)) {
-            program.appendInstruction("subu $sp, $sp, 4");
-            program.appendInstruction("sw $v0, 0($sp)");
+            if (ret instanceof FloatType) {
+                program.pushFloat("$v0");
+            } else {
+                program.pushInt("$v0");
+            }
         }
 
         program.appendInstruction(String.format("%24s %s", "#end", node));
@@ -267,9 +385,26 @@ public class CodeGen implements CommandVisitor {
     @Override
     public void visit(IfElseBranch node) {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
+
+        final String ifThenLabel = program.newLabel();
+        final String elseLabel = program.newLabel();
+        final String exitLabel = program.newLabel();
+
         node.condition().accept(this);
+
+        program.appendInstruction(ifThenLabel + ":");
+        program.popInt("$t0");
+        program.appendInstruction("beqz $t0, " + elseLabel);
+
         node.thenBlock().accept(this);
+
+        program.appendInstruction("j " + exitLabel);
+
+        program.appendInstruction(elseLabel + ":");
         node.elseBlock().accept(this);
+
+        program.appendInstruction(exitLabel + ":");
+
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
@@ -285,7 +420,12 @@ public class CodeGen implements CommandVisitor {
     public void visit(Return node) {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.argument().accept(this);
-        program.popInt("$v0");
+        final Type type = tc.getType(node);
+        if (type instanceof FloatType) {
+            program.popFloat("$v0");
+        } else {
+            program.popInt("$v0");
+        }
         program.appendInstruction("j " + getFuncEpilogueLabel(currentFunctionName));
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
