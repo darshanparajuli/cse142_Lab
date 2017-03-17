@@ -13,17 +13,16 @@ tests=(
 "test10"
 "test11"
 "test12"
-"test13"
+#"test13"
 #"test14"
-#"test15"
-#"test16"
-#"test17"
+"test15"
+"test16"
+"test17"
 #"test18"
 #"test19"
-#"test20"
-#"test21"
+"test20"
+"test21"
 #"test22"
-
 )
 
 for i in "${tests[@]}"

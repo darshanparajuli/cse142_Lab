@@ -75,12 +75,14 @@ public class CodeGen implements CommandVisitor {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         for (Statement statement : node) {
             statement.accept(this);
-            final Type type = tc.getType(statement);
-            if (type != null && !(type instanceof AddressType) && !(type instanceof VoidType)) {
-                if (type instanceof FloatType) {
-                    program.popFloat("$t0");
-                } else {
-                    program.popInt("$t1");
+            if (statement instanceof Call) {
+                final Type type = tc.getType(statement);
+                if (type != null && !(type instanceof AddressType || type instanceof VoidType)) {
+                    if (type instanceof FloatType) {
+                        program.popFloat("$f0");
+                    } else {
+                        program.popInt("$t1");
+                    }
                 }
             }
         }
@@ -293,6 +295,7 @@ public class CodeGen implements CommandVisitor {
 
         switch (node.operation()) {
             case EQ: {
+
             }
             break;
             case GE: {
@@ -303,13 +306,14 @@ public class CodeGen implements CommandVisitor {
 
             }
             break;
-
             case GT: {
 
             }
+            break;
             case LT: {
 
             }
+            break;
         }
 
         program.pushInt("$t0");
@@ -352,9 +356,16 @@ public class CodeGen implements CommandVisitor {
         node.destination().accept(this);
         node.source().accept(this);
 
-        program.popInt("$t1");
-        program.popInt("$t2");
-        program.appendInstruction("sw $t1, 0($t2)");
+        final Type type = tc.getType(node);
+        if (type instanceof FloatType) {
+            program.popFloat("$f1");
+            program.popFloat("$f2");
+            program.appendInstruction("s.s $f1, 0($f2)");
+        } else {
+            program.popInt("$t1");
+            program.popInt("$t2");
+            program.appendInstruction("sw $t1, 0($t2)");
+        }
 
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
@@ -411,8 +422,19 @@ public class CodeGen implements CommandVisitor {
     @Override
     public void visit(WhileLoop node) {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
+
+        final String loop = program.newLabel();
+        final String exitLoop = program.newLabel();
+
+        program.appendInstruction(loop + ":");
         node.condition().accept(this);
+        program.popInt("$t0");
+        program.appendInstruction("beqz $t0, " + exitLoop);
+
         node.body().accept(this);
+        program.appendInstruction("j " + loop);
+        program.appendInstruction(exitLoop + ":");
+
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
