@@ -2,7 +2,7 @@ package mips;
 
 import ast.*;
 import ast.Error;
-import types.TypeChecker;
+import types.*;
 
 public class CodeGen implements CommandVisitor {
 
@@ -49,192 +49,241 @@ public class CodeGen implements CommandVisitor {
 
     @Override
     public void visit(ExpressionList node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         for (Expression expression : node) {
             expression.accept(this);
         }
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(DeclarationList node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         for (Declaration declaration : node) {
             declaration.accept(this);
         }
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(StatementList node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         for (Statement statement : node) {
             statement.accept(this);
         }
-
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(AddressOf node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
+        currentFunction.getAddress(program, "$t1", node.symbol());
+        program.pushInt("$t1");
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(LiteralBool node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         final int val = node.value() == LiteralBool.Value.FALSE ? 0 : 1;
-        program.appendInstruction("li $t0, " + val);
-        program.pushInt("$t0");
+        program.appendInstruction("li $t1, " + val);
+        program.pushInt("$t1");
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(LiteralFloat node) {
-        System.out.println(node);
-        program.appendInstruction("li $f0, " + node.value());
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
+        program.appendInstruction("li.s $f0, " + node.value());
         program.pushFloat("$f0");
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(LiteralInt node) {
-        System.out.println(node);
-        program.appendInstruction("li $t0, " + node.value());
-        program.pushInt("$t0");
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
+        program.appendInstruction("li $t1, " + node.value());
+        program.pushInt("$t1");
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(VariableDeclaration node) {
-        System.out.println(node);
         currentFunction.add(program, node);
     }
 
     @Override
     public void visit(ArrayDeclaration node) {
-        System.out.println(node);
         currentFunction.add(program, node);
     }
 
     @Override
     public void visit(FunctionDefinition node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         final String name = node.function().name();
         currentFunction = new ActivationRecord(node, currentFunction);
         final int pos = program.appendInstruction(program.newFuncLabel(name) + ":");
         node.body().accept(this);
-        program.insertPrologue(pos, currentFunction.stackSize());
-        if (name.equals("main")) {
-            program.appendExitSequence();
-        } else {
-            program.appendEpilogue(currentFunction.stackSize());
-        }
-        if (currentFunction.parent() != null) {
-            currentFunction = currentFunction.parent();
-        }
+        program.insertPrologue(pos + 1, currentFunction.stackSize());
+        program.appendEpilogue(currentFunction.stackSize());
+        currentFunction = currentFunction.parent();
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Addition node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Subtraction node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Multiplication node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Division node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(LogicalAnd node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(LogicalOr node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(LogicalNot node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.expression().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Comparison node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.leftSide().accept(this);
         node.rightSide().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Dereference node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.expression().accept(this);
+        program.popInt("$t1");
+        program.appendInstruction("lw $t1, 0($t1)");
+        program.pushInt("$t1");
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Index node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.base().accept(this);
         node.amount().accept(this);
+
+        final AddressType baseType = (AddressType) tc.getType(node);
+
+        program.popInt("$t2"); //
+        program.popInt("$t1");
+        program.appendInstruction("li $t3, " + ActivationRecord.numBytes(baseType.base()));
+        program.appendInstruction("mul $t2, $t2, $t3");
+        program.appendInstruction("add $t1, $t1, $t2");
+        program.pushInt("$t1");
+
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Assignment node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
+
         node.destination().accept(this);
         node.source().accept(this);
+
+        program.appendInstruction("lw $t1, 0($sp)");
+        program.appendInstruction("addi $sp, $sp, 4");
+        program.appendInstruction("lw $t2, 0($sp)");
+        program.appendInstruction("addi $sp, $sp, 4");
+
+        program.appendInstruction("sw $t1, 0($t2)");
+
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Call node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.arguments().accept(this);
+
+        final FuncType funcType = (FuncType) node.function().type();
+        final TypeList argType = (TypeList) tc.getType(node.arguments());
+
         program.appendInstruction("jal " + program.newFuncLabel(node.function().name()));
+        program.appendInstruction("addi $sp, $sp, " + node.arguments().size() * 4);
+
+        final Type ret = funcType.call(argType);
+        if (!(ret instanceof VoidType)) {
+            program.appendInstruction("subu $sp, $sp, 4");
+            program.appendInstruction("sw $v0, 0($sp)");
+        }
+
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(IfElseBranch node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.condition().accept(this);
         node.thenBlock().accept(this);
         node.elseBlock().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(WhileLoop node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.condition().accept(this);
         node.body().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Return node) {
-        System.out.println(node);
+        program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.argument().accept(this);
+        program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
     @Override
     public void visit(Error node) {
-        System.out.println(node);
         String message = "CodeGen cannot compile a " + node.toString();
         errorBuffer.append(message);
         throw new CodeGenException(message);
