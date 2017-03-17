@@ -9,7 +9,8 @@ public class CodeGen implements CommandVisitor {
     private StringBuffer errorBuffer = new StringBuffer();
     private TypeChecker tc;
     private Program program;
-    private ActivationRecord currentFunction;
+    private ActivationRecord currentActivationRecord;
+    private String currentFunctionName;
 
     public CodeGen(TypeChecker tc) {
         this.tc = tc;
@@ -33,9 +34,13 @@ public class CodeGen implements CommandVisitor {
         }
     }
 
+    private String getFuncEpilogueLabel(String name) {
+        return program.newFuncLabel(name) + ".epilogue";
+    }
+
     public boolean generate(Command ast) {
         try {
-            currentFunction = ActivationRecord.newGlobalFrame();
+            currentActivationRecord = ActivationRecord.newGlobalFrame();
             ast.accept(this);
             return !hasError();
         } catch (CodeGenException e) {
@@ -77,7 +82,7 @@ public class CodeGen implements CommandVisitor {
     @Override
     public void visit(AddressOf node) {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
-        currentFunction.getAddress(program, "$t1", node.symbol());
+        currentActivationRecord.getAddress(program, "$t1", node.symbol());
         program.pushInt("$t1");
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
@@ -109,24 +114,25 @@ public class CodeGen implements CommandVisitor {
 
     @Override
     public void visit(VariableDeclaration node) {
-        currentFunction.add(program, node);
+        currentActivationRecord.add(program, node);
     }
 
     @Override
     public void visit(ArrayDeclaration node) {
-        currentFunction.add(program, node);
+        currentActivationRecord.add(program, node);
     }
 
     @Override
     public void visit(FunctionDefinition node) {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
-        final String name = node.function().name();
-        currentFunction = new ActivationRecord(node, currentFunction);
-        final int pos = program.appendInstruction(program.newFuncLabel(name) + ":");
+        currentFunctionName = node.function().name();
+        currentActivationRecord = new ActivationRecord(node, currentActivationRecord);
+        final int pos = program.appendInstruction(program.newFuncLabel(currentFunctionName) + ":");
         node.body().accept(this);
-        program.insertPrologue(pos + 1, currentFunction.stackSize());
-        program.appendEpilogue(currentFunction.stackSize());
-        currentFunction = currentFunction.parent();
+        program.insertPrologue(pos + 1, currentActivationRecord.stackSize());
+        program.appendInstruction(getFuncEpilogueLabel(currentFunctionName) + ":");
+        program.appendEpilogue(currentActivationRecord.stackSize());
+        currentActivationRecord = currentActivationRecord.parent();
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
@@ -279,6 +285,8 @@ public class CodeGen implements CommandVisitor {
     public void visit(Return node) {
         program.appendInstruction(String.format("%24s %s", "#begin", node));
         node.argument().accept(this);
+        program.popInt("$v0");
+        program.appendInstruction("j " + getFuncEpilogueLabel(currentFunctionName));
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
 
