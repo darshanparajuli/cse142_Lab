@@ -77,7 +77,7 @@ public class CodeGen implements CommandVisitor {
             statement.accept(this);
             if (statement instanceof Call) {
                 final Type type = tc.getType(statement);
-                if (type != null && !(type instanceof AddressType || type instanceof VoidType)) {
+                if (!(type instanceof VoidType)) {
                     if (type instanceof FloatType) {
                         program.popFloat("$f0");
                     } else {
