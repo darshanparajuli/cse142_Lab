@@ -293,29 +293,66 @@ public class CodeGen implements CommandVisitor {
             program.popInt("$t0");
         }
 
+        final String labelTrue = program.newLabel();
+        final String labelFalse = program.newLabel();
+        final String labelExit = program.newLabel();
+
         switch (node.operation()) {
             case EQ: {
-
+                if (type instanceof FloatType) {
+                    program.appendInstruction("c.eq.s, $f0, $f1");
+                    program.appendInstruction("bc1t " + labelTrue);
+                } else {
+                    program.appendInstruction("seq, $t0, $t0, $t1");
+                }
             }
             break;
             case GE: {
-
+                if (type instanceof FloatType) {
+                    program.appendInstruction("c.ge.s, $f0, $f1");
+                    program.appendInstruction("bc1t " + labelTrue);
+                } else {
+                    program.appendInstruction("sge, $t0, $t0, $t1");
+                }
             }
             break;
             case LE: {
-
+                if (type instanceof FloatType) {
+                    program.appendInstruction("c.le.s, $f0, $f1");
+                    program.appendInstruction("bc1t " + labelTrue);
+                } else {
+                    program.appendInstruction("sle, $t0, $t0, $t1");
+                }
             }
             break;
             case GT: {
-
+                if (type instanceof FloatType) {
+                    program.appendInstruction("c.gt.s, $f0, $f1");
+                    program.appendInstruction("bc1t " + labelTrue);
+                } else {
+                    program.appendInstruction("sgt, $t0, $t0, $t1");
+                }
             }
             break;
             case LT: {
-
+                if (type instanceof FloatType) {
+                    program.appendInstruction("c.lt.s, $f0, $f1");
+                    program.appendInstruction("bc1t " + labelTrue);
+                } else {
+                    program.appendInstruction("slt, $t0, $t0, $t1");
+                }
             }
             break;
         }
 
+        if (type instanceof FloatType) {
+            program.appendInstruction(labelTrue + ":");
+            program.appendInstruction("addi $t0, $0, 1");
+            program.appendInstruction("j " + labelExit);
+            program.appendInstruction(labelFalse + ":");
+            program.appendInstruction("addi $t0, $0, 0");
+            program.appendInstruction(labelExit + ":");
+        }
         program.pushInt("$t0");
 
         program.appendInstruction(String.format("%24s %s", "#end", node));

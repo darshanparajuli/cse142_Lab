@@ -55,6 +55,12 @@ public class Scanner implements Iterable<Token> {
                             readNextChar();
                         }
                         break;
+                        case '\t': {
+                            do {
+                                readNextChar();
+                            } while (nextChar == '\t');
+                        }
+                        break;
                         case ' ': {
                             do {
                                 readNextChar();
