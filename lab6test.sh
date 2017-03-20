@@ -33,6 +33,8 @@ rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 javac $(find ./lab6/src -name "*.java") -d ${BUILD_DIR}
 
+ret_val=0
+
 echo "> Running tests in "${TESTS_DIR}
 for i in "${TESTS[@]}"
 do
@@ -49,6 +51,7 @@ do
     then
         echo ${test_name}: PASS
     else
+        ret_val=1
         echo ${test_name}: FAIL
         while read -r line; do
             echo "  $line"
@@ -56,4 +59,4 @@ do
     fi
 done
 
-exit 0
+exit ${ret_val}
