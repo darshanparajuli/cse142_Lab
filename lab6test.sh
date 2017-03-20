@@ -1,5 +1,7 @@
 #!/bin/bash
 
+BUILD_DIR=lab6/build
+TESTS_DIR=lab6/test/crux/test_files
 TESTS=(
 "test01"
 "test02"
@@ -25,17 +27,13 @@ TESTS=(
 "test22"
 )
 
-
-build_dir=lab6/build
-test_dir=lab6/test/crux/test_files
-
 echo "> Building"
 
-rm -rf ${build_dir}
-mkdir -p ${build_dir}
-javac $(find ./lab6/src -name "*.java") -d ${build_dir}
+rm -rf ${BUILD_DIR}
+mkdir -p ${BUILD_DIR}
+javac $(find ./lab6/src -name "*.java") -d ${BUILD_DIR}
 
-echo "> Running tests in "${test_dir}
+echo "> Running tests in "${TESTS_DIR}
 for i in "${TESTS[@]}"
 do
     if [[ "$1" != "" && "$1" != "$i" ]];
@@ -43,8 +41,8 @@ do
         continue
     fi
 
-    FILE=${test_dir}/$i
-    java -classpath ${build_dir} crux.Compiler  ${FILE}.crx
+    FILE=${TESTS_DIR}/$i
+    java -classpath ${BUILD_DIR} crux.Compiler  ${FILE}.crx
     result=$(diff -a <(cat ${FILE%.crx}.in  | spim -file ${FILE%.crx}.asm | tail -n +2) ${FILE%.crx}.out)
     test_name=${FILE##*/}
     if [[ -z ${result} ]]
