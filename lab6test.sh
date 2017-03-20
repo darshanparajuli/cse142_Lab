@@ -28,7 +28,6 @@ TESTS=(
 )
 
 echo "> Building"
-
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 javac $(find ./lab6/src -name "*.java") -d ${BUILD_DIR}
