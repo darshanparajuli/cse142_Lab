@@ -33,14 +33,13 @@ do
     fi
 
     FILE=lab6/test/crux/test_files/$i
-    echo ${FILE}
     java -jar lab6/lab6.jar ${FILE}.crx
     result=$(diff -a <(cat ${FILE%.crx}.in  | spim -file ${FILE%.crx}.asm | tail -n +2) ${FILE%.crx}.out)
     if [[ -z ${result} ]]
     then
-        echo passed
+        echo ${FILE}: PASS
     else
-        echo failed
+        echo ${FILE}: FAIL
         while read -r line; do
             echo "  $line"
         done <<< "${result}"
