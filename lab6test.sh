@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tests=(
+TESTS=(
 "test01"
 "test02"
 "test03"
@@ -36,7 +36,7 @@ mkdir -p ${build_dir}
 javac $(find ./lab6/src -name "*.java") -d ${build_dir}
 
 echo "> Running tests in "${test_dir}
-for i in "${tests[@]}"
+for i in "${TESTS[@]}"
 do
     if [[ "$1" != "" && "$1" != "$i" ]];
     then
