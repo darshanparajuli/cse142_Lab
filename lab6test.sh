@@ -25,6 +25,14 @@ tests=(
 "test22"
 )
 
+echo Building...
+
+build_dir=./lab6/build
+rm -rf ${build_dir}
+mkdir -p ${build_dir}
+javac $(find ./lab6/src -name "*.java") -d ${build_dir}
+
+echo Running tests
 for i in "${tests[@]}"
 do
     if [[ "$1" != "" && "$1" != "$i" ]];
@@ -32,8 +40,8 @@ do
         continue
     fi
 
-    FILE=lab6/test/crux/test_files/$i
-    java -jar lab6/lab6.jar ${FILE}.crx
+    FILE=./lab6/test/crux/test_files/$i
+    java -classpath ./lab6/build crux.Compiler  ${FILE}.crx
     result=$(diff -a <(cat ${FILE%.crx}.in  | spim -file ${FILE%.crx}.asm | tail -n +2) ${FILE%.crx}.out)
     if [[ -z ${result} ]]
     then
