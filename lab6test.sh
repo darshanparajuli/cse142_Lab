@@ -46,11 +46,12 @@ do
     FILE=${test_dir}/$i
     java -classpath ${build_dir} crux.Compiler  ${FILE}.crx
     result=$(diff -a <(cat ${FILE%.crx}.in  | spim -file ${FILE%.crx}.asm | tail -n +2) ${FILE%.crx}.out)
+    test_name=${FILE##*/}
     if [[ -z ${result} ]]
     then
-        echo ${FILE##*/}: PASS
+        echo ${test_name}: PASS
     else
-        echo ${FILE##*/}: FAIL
+        echo ${test_name}: FAIL
         while read -r line; do
             echo "  $line"
         done <<< "${result}"
