@@ -44,7 +44,7 @@ do
     fi
 
     FILE=${test_dir}/$i
-    java -classpath ./lab6/build crux.Compiler  ${FILE}.crx
+    java -classpath ${build_dir} crux.Compiler  ${FILE}.crx
     result=$(diff -a <(cat ${FILE%.crx}.in  | spim -file ${FILE%.crx}.asm | tail -n +2) ${FILE%.crx}.out)
     if [[ -z ${result} ]]
     then
