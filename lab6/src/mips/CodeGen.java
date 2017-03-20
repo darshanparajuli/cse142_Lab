@@ -142,6 +142,11 @@ public class CodeGen implements CommandVisitor {
         program.insertPrologue(pos + 1, currentActivationRecord.stackSize());
         program.appendInstruction(getFuncEpilogueLabel(currentFunctionName) + ":");
         program.appendEpilogue(currentActivationRecord.stackSize());
+
+        if (currentFunctionName.equals("main")) {
+            program.appendExitSequence();
+        }
+
         currentActivationRecord = currentActivationRecord.parent();
         program.appendInstruction(String.format("%24s %s", "#end", node));
     }
